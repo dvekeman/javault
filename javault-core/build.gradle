@@ -1,0 +1,4 @@
+test {
+    jvmArgs "-Djava.security.policy=all.policy", "-Djava.security.manager=java.lang.SecurityManager"
+    testLogging.showStandardStreams = true
+}

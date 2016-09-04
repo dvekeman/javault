@@ -1,0 +1,4 @@
+rootProject.name = 'javault'
+
+include 'javault-core'
+//include 'javault-ws'

@@ -1,0 +1,27 @@
+allprojects {
+    repositories {
+        jcenter()
+        mavenCentral()
+    }
+    buildscript {
+        repositories {
+            mavenCentral()
+        }
+        dependencies {
+            classpath("org.springframework.boot:spring-boot-gradle-plugin:1.4.0.RELEASE")
+        }
+    }
+}
+
+subprojects {
+    apply plugin: 'java'
+    dependencies {
+        compile 'org.slf4j:slf4j-api:1.7.21'
+        compile 'org.slf4j:slf4j-log4j12:1.7.21'
+        compile 'org.apache.logging.log4j:log4j:2.6.2'
+        compile 'com.google.guava:guava:19.0'
+        
+        testCompile 'junit:junit:4.12'
+    }
+    
+}
