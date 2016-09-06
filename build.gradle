@@ -27,13 +27,9 @@ subprojects {
         testCompile 'junit:junit:4.12'
     }
 
-    jacoco {
-        toolVersion = "0.7.6.201602180812"
-    }
-
     jacocoTestReport {
         reports {
-            xml.enabled false
+            xml.enabled true
             csv.enabled false
             html.destination "${buildDir}/jacocoHtml"
         }
