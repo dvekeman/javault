@@ -16,6 +16,16 @@ This codebase consists of a number of modules
 - ```javault-runner```: command line execution (see examples below)
 - ```javault-ws```: web service (REST) wrapper to call the javault as a service
 
+Main features
+
+Javault Core...
+- ... does not accept *anything* if code is not running with the SecurityManager
+- ... by default does not grant any permissions to executing code
+- ... can compile and run java source files if needed (input is correct .java file)
+- ... can compile and run snippets (input is any plaintext with correct java statements)
+- ... can run class files (from a provided directory)
+- ... can - not yet - run jar files
+
 See README.MD inside 
 [```javault-runner```](https://github.com/dvekeman/javault/blob/master/javault-runner/README.MD) and 
 [```javault-ws```](https://github.com/dvekeman/javault/blob/master/javault-ws/README.MD)

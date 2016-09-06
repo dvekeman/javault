@@ -59,6 +59,11 @@ public class JavaultController {
 		VaultRunner vaultRunner = new DefaultVaultRunner();
 		try {
 			VaultOutput output = vaultRunner.runInVault0(name, source);
+			if(output.getSyserr() != null && !"".equals(output.getSyserr())){
+				System.err.println("SYSERR:");
+				output.getSyserr();
+			}
+			System.out.println("SYSOUT:");
 			return output.getSysout();
 		} catch (VaultException ve) {
 			throw new HttpVaultException(ve);
@@ -70,6 +75,11 @@ public class JavaultController {
 		VaultRunner vaultRunner = new DefaultVaultRunner();
 		try {
 			VaultOutput output = vaultRunner.runInVault0(source);
+			if(output.getSyserr() != null && !"".equals(output.getSyserr())){
+				System.err.println("SYSERR:");
+				output.getSyserr();
+			}
+			System.out.println("SYSOUT:");
 			return output.getSysout();
 		} catch (VaultException ve) {
 			throw new HttpVaultException(ve);

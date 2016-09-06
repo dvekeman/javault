@@ -36,7 +36,7 @@ public class DefaultVaultRunner implements VaultRunner {
 		//allowedPermissions.add(new java.io.FilePermission("evil.txt", "read"));
 		// >>>
 
-		allowedPermissionsAcc = new AccessControlContext(new ProtectionDomain[] {
+		allowedPermissionsAcc = new AccessControlContext(new ProtectionDomain[]{
 				new ProtectionDomain(null, allowedPermissions)});
 	}
 
@@ -53,9 +53,9 @@ public class DefaultVaultRunner implements VaultRunner {
 			Class<Runnable> clazz = inflightCompiler.compileSource(className, source);
 			Runnable r = loadUntrusted(clazz);
 			return internalRunInVault(r);
-		} catch(CompilerException ce){
+		} catch (CompilerException ce) {
 			throw new VaultException(String.format("Unable to compile the source code for %s", className), ce);
-		} 
+		}
 	}
 
 	@Override
@@ -78,12 +78,12 @@ public class DefaultVaultRunner implements VaultRunner {
 	private VaultOutput internalRunInVault(Runnable runnable) throws VaultException {
 		//Enforce that the security manager is enabled
 		String securityManager = System.getProperty("java.security.manager");
-		if(securityManager == null || "".equals(securityManager)){
+		if (securityManager == null || "".equals(securityManager)) {
 			throw new VaultException("Security manager is mandatory. Run with -Djava.security.manager=java.lang.SecurityManager -Djava.security.policy=all.policy ");
 		}
 		try {
 			return doRun(runnable);
-		} catch(PrivilegedActionException e){
+		} catch (PrivilegedActionException e) {
 			String msg = "Security breach: untrusted code found. Thankfully we stopped it!";
 			LOG.warn(msg);
 			throw new VaultException(msg, e.getCause());
@@ -96,32 +96,36 @@ public class DefaultVaultRunner implements VaultRunner {
 	 * @param r The <code>Runnable</code> to execute
 	 */
 	private VaultOutput doRun(Runnable runnable) throws PrivilegedActionException {
-		// Redirect the System.out to a custom outputstream
-		ByteArrayOutputStream sysout = new ByteArrayOutputStream();
-		ByteArrayOutputStream syserr = new ByteArrayOutputStream();
-		System.setOut(new PrintStream(sysout));
-		System.setErr(new PrintStream(syserr));
-		
-		AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
-			public Void run() throws InterruptedException, InternalVaultException {
-				final List<InternalVaultException> resultingException = Lists.newArrayList();
-				Thread t = new Thread(runnable);
-				t.setUncaughtExceptionHandler((t1, e) -> 
-						resultingException.add(new InternalVaultException("Uncaught exception on thread " + t1.getId(), e)));
-				t.start();
-				t.join();
-				if(resultingException.isEmpty()){
-					return null;
-				} else {
-					throw resultingException.get(0);
-				}
-			}
-		}, allowedPermissionsAcc);
+		try {
+			// Redirect the System.out to a custom outputstream
+			ByteArrayOutputStream sysout = new ByteArrayOutputStream();
+			ByteArrayOutputStream syserr = new ByteArrayOutputStream();
+			System.setOut(new PrintStream(sysout));
+			System.setErr(new PrintStream(syserr));
 
-		// Reset the System.out
-		System.setOut(new PrintStream(new FileOutputStream(FileDescriptor.out)));
-		System.setErr(new PrintStream(new FileOutputStream(FileDescriptor.err)));
-		return new VaultOutput(null, sysout, syserr);
+			AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
+				public Void run() throws InterruptedException, InternalVaultException {
+					final List<InternalVaultException> resultingException = Lists.newArrayList();
+
+					Thread t = new Thread(runnable);
+					t.setUncaughtExceptionHandler((t1, e) ->
+							resultingException.add(new InternalVaultException("Uncaught exception on thread " + t1.getId(), e)));
+					t.start();
+					t.join();
+					if (resultingException.isEmpty()) {
+						return null;
+					} else {
+						throw resultingException.get(0);
+					}
+				}
+			}, allowedPermissionsAcc);
+
+			return new VaultOutput(null, sysout, syserr);
+		} finally {
+			// Reset the System.out
+			System.setOut(new PrintStream(new FileOutputStream(FileDescriptor.out)));
+			System.setErr(new PrintStream(new FileOutputStream(FileDescriptor.err)));
+		}
 	}
 
 	/*
@@ -135,11 +139,11 @@ public class DefaultVaultRunner implements VaultRunner {
 	private Runnable loadUntrusted(List<URL> paths, String runnableClass) throws VaultException {
 		try {
 			Class c = loadClass(paths, runnableClass);
-			
+
 			Class[] interfaces = c.getInterfaces();
 			boolean isRunnable = Arrays.asList(interfaces).stream()
 					.anyMatch(aClass -> aClass.getCanonicalName().equals(Runnable.class.getCanonicalName()));
-			if(isRunnable) {
+			if (isRunnable) {
 				return (Runnable) c.newInstance();
 			}
 			throw new VaultException("Unable to determine how to run this code");
