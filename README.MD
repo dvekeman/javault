@@ -16,7 +16,9 @@ This codebase consists of a number of modules
 - ```javault-runner```: command line execution (see examples below)
 - ```javault-ws```: web service (REST) wrapper to call the javault as a service
 
-See README.MD inside ```javault-runner``` and ```javault-ws```
+See README.MD inside 
+[```javault-runner```](https://github.com/dvekeman/javault/blob/master/javault-runner/README.MD) and 
+[```javault-ws```](https://github.com/dvekeman/javault/blob/master/javault-ws/README.MD)
 
 ### Examples
 
