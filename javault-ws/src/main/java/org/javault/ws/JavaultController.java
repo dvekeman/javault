@@ -47,6 +47,13 @@ public class JavaultController {
 		return doRunInVault0(name, source);
 	}
 
+	@RequestMapping(path = "/runScriptInVault0", method = RequestMethod.POST)
+	public String postRunScriptInVault0(
+			@RequestBody String source) throws HttpVaultException {
+		LOG.debug("source: " + source);
+		return doRunScriptInVault0(source);
+	}
+
 	private String doRunInVault0(String name, String source) throws HttpVaultException {
 		//TODO: wrap in service
 		VaultRunner vaultRunner = new DefaultVaultRunner();
@@ -58,5 +65,15 @@ public class JavaultController {
 		}
 	}
 
+	private String doRunScriptInVault0(String source) throws HttpVaultException {
+		//TODO: wrap in service
+		VaultRunner vaultRunner = new DefaultVaultRunner();
+		try {
+			VaultOutput output = vaultRunner.runInVault0(source);
+			return output.getSysout();
+		} catch (VaultException ve) {
+			throw new HttpVaultException(ve);
+		}
+	}
 
 }

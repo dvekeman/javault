@@ -11,13 +11,15 @@ There are several ways to run the Application:
 
     ./gradlew :javault-ws:build
     # Run in UNSECURE mode (everything will fail)
-    java -jar -Dspring.profiles.active=unsecure ./javault-ws/build/libs/javault-ws-0.1.0.jar
+    ./gradlew :javault-ws:build && java -jar -Dspring.profiles.active=unsecure ./javault-ws/build/libs/javault-ws-0.1.0.jar
     # Run in SECURE mode
-    java -jar -Dspring.profiles.active=secure ./javault-ws/build/libs/javault-ws-0.1.0.jar
+    ./gradlew :javault-ws:build && java -jar -Dspring.profiles.active=secure ./javault-ws/build/libs/javault-ws-0.1.0.jar
 
 # 2. Run some tests
 
-From the root directory (javault) run the following curl command:
+From the root directory (javault) run the following curls command as test:
+
+## Provide a JAVA file as input
 
     curl -X POST -H"Content-Type:text/plain" http://localhost:9000/runInVault0?name=HelloWorld -d @javault-ws/testfiles/HelloWorld.java
 
@@ -33,3 +35,11 @@ Here is a second example:
 Here is an example which fails because we try to read file: 
 
     curl -X POST -H"Content-Type:text/plain" http://localhost:9000/runInVault0?name=Pwd -d @javault-ws/testfiles/Pwd.java
+
+## Provide a PLAIN TEXT (script) as input
+
+    curl -X POST -H"Content-Type:text/plain" http://localhost:9000/runScriptInVault0 -d @javault-ws/testfiles/CounterScript.txt
+
+Same as above but as oneliner
+
+    curl -X POST -H"Content-Type:text/plain" http://localhost:9000/runScriptInVault0 -d 'int sum = 0;int product = 1;for(int i = 1; i <= 10; i++){    System.out.println("i = " + i);    sum += i;    product *= i;}System.out.println("sum = " + sum);System.out.println("product = " + product);'
