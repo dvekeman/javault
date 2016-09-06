@@ -63,6 +63,18 @@ public class DefaultVaultRunner implements VaultRunner {
 		return internalRunInVault(runnable);
 	}
 
+	@Override
+	public VaultOutput runInVault0(String source) throws VaultException {
+		String tempClassName = "TempVaultExec";
+		String tempHost = "" +
+				"public class %s implements Runnable {\n" +
+				"  public void run() {\n" +
+				"    %s" +
+				"  }\n" +
+				"}\n";
+		return runInVault0(tempClassName, String.format(tempHost, tempClassName, source));
+	}
+
 	private VaultOutput internalRunInVault(Runnable runnable) throws VaultException {
 		//Enforce that the security manager is enabled
 		String securityManager = System.getProperty("java.security.manager");

@@ -76,4 +76,11 @@ public class VaultRunnerTest {
 		assertEquals("Hello World, from a generated program!\n", output.getSysout());
 	}
 
+	@Test
+	public void testRunScript() throws VaultException, UnsupportedEncodingException {
+		String helloWorldAsScript = "" +
+				"    System.out.println(\"Hello World, a script, from a generated program!\");\n";
+		VaultOutput output = vaultRunner.runInVault0(helloWorldAsScript);
+		assertEquals("Hello World, a script, from a generated program!\n", output.getSysout());
+	}
 }
