@@ -11,4 +11,6 @@ cache:
 jdk:
   - oraclejdk8
   
-bash <(curl -s https://codecov.io/bash)
+# public repo on Travis CI
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
