@@ -14,6 +14,7 @@ import java.security.Permissions;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.security.ProtectionDomain;
+import java.util.Arrays;
 import java.util.List;
 
 import org.javaault.compiler.api.CompilerException;
@@ -122,7 +123,14 @@ public class DefaultVaultRunner implements VaultRunner {
 	private Runnable loadUntrusted(List<URL> paths, String runnableClass) throws VaultException {
 		try {
 			Class c = loadClass(paths, runnableClass);
-			return (Runnable) c.newInstance();
+			
+			Class[] interfaces = c.getInterfaces();
+			boolean isRunnable = Arrays.asList(interfaces).stream()
+					.anyMatch(aClass -> aClass.getCanonicalName().equals(Runnable.class.getCanonicalName()));
+			if(isRunnable) {
+				return (Runnable) c.newInstance();
+			}
+			throw new VaultException("Unable to determine how to run this code");
 		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | MalformedURLException e) {
 			throw new VaultException("Oops, something went wrong. We could not instantiate the class", e);
 		}
