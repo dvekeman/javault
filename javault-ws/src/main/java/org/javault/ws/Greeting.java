@@ -1,4 +1,4 @@
-package hello;
+package org.javault.ws;
 
 public class Greeting {
 

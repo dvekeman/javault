@@ -1,4 +1,6 @@
 rootProject.name = 'javault'
 
 include 'javault-core'
-//include 'javault-ws'
+include 'javault-compiler-api'
+include 'javault-simple-compiler'
+include 'javault-ws'

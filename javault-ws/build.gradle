@@ -1,5 +1,9 @@
 apply plugin: 'spring-boot'
 
+springBoot {
+    executable = true
+}
+
 task genJaxb {
     ext.sourcesDir = "${buildDir}/generated-sources/jaxb"
     ext.classesDir = "${buildDir}/classes/jaxb"
@@ -36,14 +40,14 @@ task genJaxb {
     }
 }
 
-configurations {
-    jaxb
-}
+//configurations {
+//    jaxb
+//}
 
 jar {
     baseName = 'javault-ws'
     version =  '0.1.0'
-    from genJaxb.classesDir
+    //from genJaxb.classesDir
 }
 
 dependencies {
@@ -59,8 +63,10 @@ dependencies {
 
     compile("wsdl4j:wsdl4j:1.6.1")
 
-    jaxb("com.sun.xml.bind:jaxb-xjc:2.2.4-1")
-    compile(files(genJaxb.classesDir).builtBy(genJaxb))
+//    jaxb("com.sun.xml.bind:jaxb-xjc:2.2.4-1")
+//    compile(files(genJaxb.classesDir).builtBy(genJaxb))
+    
+    compile project(path: ":javault-core")
 
     testCompile("org.springframework.boot:spring-boot-starter-test")
 

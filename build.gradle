@@ -15,13 +15,37 @@ allprojects {
 
 subprojects {
     apply plugin: 'java'
+    apply plugin: 'jacoco'
+    
     dependencies {
         compile 'org.slf4j:slf4j-api:1.7.21'
         compile 'org.slf4j:slf4j-log4j12:1.7.21'
         compile 'org.apache.logging.log4j:log4j:2.6.2'
         compile 'com.google.guava:guava:19.0'
-        
+        compile 'io.reactivex:rxjava:1.0.10'
+
         testCompile 'junit:junit:4.12'
     }
-    
+
+    jacoco {
+        toolVersion = "0.7.6.201602180812"
+    }
+
+    jacocoTestReport {
+        reports {
+            xml.enabled false
+            csv.enabled false
+            html.destination "${buildDir}/jacocoHtml"
+        }
+    }
+
+    test {
+        jacoco {
+            append = false
+            destinationFile = file("$buildDir/jacoco/jacocoTest.exec")
+            classDumpFile = file("$buildDir/jacoco/classpathdumps")
+        }
+    }
+    check.dependsOn jacocoTestReport
 }
+

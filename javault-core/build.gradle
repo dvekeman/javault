@@ -1,3 +1,12 @@
+dependencies {
+    compile project(path: ":javault-compiler-api");
+    
+    //TODO: this should not be here, the compiler should be injected
+    compile project(path: ":javault-simple-compiler")
+    
+    testCompile project(path: ":javault-simple-compiler")
+}
+
 test {
     jvmArgs "-Djava.security.policy=all.policy", "-Djava.security.manager=java.lang.SecurityManager"
     testLogging.showStandardStreams = true
