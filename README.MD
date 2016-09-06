@@ -20,6 +20,6 @@ See README.MD inside ```javault-runner``` and ```javault-ws```
 
 ### Examples
 
-![Alt text](doc/img/javault-runner-example1.jpg "Command line usage (javault-runner)")
+![Alt text](https://github.com/dvekeman/javault/blob/master/doc/img/javault-runner-example1.png "Command line usage (javault-runner)")
 
-![Alt text](doc/img/javault-ws-example1.jpg "Web Service usage (javault-ws)")
+![Alt text](https://github.com/dvekeman/javault/blob/master/doc/img/javault-ws-example1.png "Web Service usage (javault-ws)")
