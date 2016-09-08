@@ -35,7 +35,7 @@ public class VaultRunnerTest {
 		String securityManager = System.getProperty("java.security.manager");
 		System.out.println("Current security manager: " + securityManager);
 
-		System.clearProperty("java.security.manager");
+		System.setSecurityManager(null);
 		securityManager = System.getProperty("java.security.manager");
 		System.out.println("Current security manager: " + securityManager);
 

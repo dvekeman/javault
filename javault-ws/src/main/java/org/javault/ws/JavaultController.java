@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+//@RequestMapping(value = "/javault-ws-0.1.0")
 public class JavaultController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DefaultVaultRunner.class);

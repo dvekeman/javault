@@ -77,8 +77,9 @@ public class DefaultVaultRunner implements VaultRunner {
 
 	private VaultOutput internalRunInVault(Runnable runnable) throws VaultException {
 		//Enforce that the security manager is enabled
-		String securityManager = System.getProperty("java.security.manager");
-		if (securityManager == null || "".equals(securityManager)) {
+		SecurityManager securityManager = System.getSecurityManager();
+		LOG.debug("Security Manager: " + securityManager);
+		if (securityManager == null) {
 			throw new VaultException("Security manager is mandatory. Run with -Djava.security.manager=java.lang.SecurityManager -Djava.security.policy=all.policy ");
 		}
 		try {

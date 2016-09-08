@@ -1,53 +1,20 @@
 apply plugin: 'spring-boot'
+apply plugin: 'war'
+apply plugin: 'com.bmuschko.cargo'
 
-springBoot {
-    executable = true
-}
-
-task genJaxb {
-    ext.sourcesDir = "${buildDir}/generated-sources/jaxb"
-    ext.classesDir = "${buildDir}/classes/jaxb"
-    ext.schema = "src/main/resources/countries.xsd"
-
-    outputs.dir classesDir
-
-    doLast() {
-        project.ant {
-            taskdef name: "xjc", classname: "com.sun.tools.xjc.XJCTask",
-                    classpath: configurations.jaxb.asPath
-            mkdir(dir: sourcesDir)
-            mkdir(dir: classesDir)
-
-            xjc(destdir: sourcesDir, schema: schema) {
-                arg(value: "-wsdl")
-                produces(dir: sourcesDir, includes: "**/*.java")
-            }
-
-            javac(destdir: classesDir, source: 1.8, target: 1.8, debug: true,
-                    debugLevel: "lines,vars,source",
-                    classpath: configurations.jaxb.asPath) {
-                src(path: sourcesDir)
-                include(name: "**/*.java")
-                include(name: "*.java")
-            }
-
-            copy(todir: classesDir) {
-                fileset(dir: sourcesDir, erroronmissingdir: false) {
-                    exclude(name: "**/*.java")
-                }
-            }
-        }
+buildscript {
+    dependencies {
+        classpath 'com.bmuschko:gradle-cargo-plugin:2.1.1'
     }
 }
 
-//configurations {
-//    jaxb
-//}
-
-jar {
+war {
     baseName = 'javault-ws'
     version =  '0.1.0'
-    //from genJaxb.classesDir
+}
+
+springBoot {
+    executable = true
 }
 
 dependencies {
@@ -56,19 +23,45 @@ dependencies {
         exclude group: "org.slf4j", module: "log4j-over-slf4j"
     }
 
-    compile("org.springframework.boot:spring-boot-starter-ws") {
+    compile("org.springframework.boot:spring-boot-starter-web-services") {
         exclude group: "ch.qos.logback", module:"logback-classic"
         exclude group: "org.slf4j", module: "log4j-over-slf4j"
     }
 
+    providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
+    
     compile("wsdl4j:wsdl4j:1.6.1")
 
-//    jaxb("com.sun.xml.bind:jaxb-xjc:2.2.4-1")
-//    compile(files(genJaxb.classesDir).builtBy(genJaxb))
-    
     compile project(path: ":javault-core")
 
     testCompile("org.springframework.boot:spring-boot-starter-test")
 
 }
 
+def TOMCAT8_HOME = "/opt/tomcat8"
+task copyPolicy(type: Copy) {
+    from file('all.policy')
+    into file("${TOMCAT8_HOME}/conf/")
+}
+
+cargo {
+    
+    containerId = 'tomcat8x'
+    port = 8080
+
+    deployable {
+        context = 'javault-ws'
+    }
+    
+    local {
+        homeDir = file(TOMCAT8_HOME)
+        jvmArgs =
+            '-Djava.security.manager=java.lang.SecurityManager ' +
+            '-Djava.security.policy=${catalina.home}/conf/all.policy'
+        containerProperties {
+            property 'cargo.tomcat.httpSecure', true
+        }
+    }
+}
+cargoStartLocal.dependsOn war
+cargoStartLocal.dependsOn copyPolicy
