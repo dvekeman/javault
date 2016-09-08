@@ -3,6 +3,7 @@
 package org.javault.simplecompiler;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.Charset;
@@ -41,12 +42,14 @@ public class SimpleJavaCompiler implements InflightCompiler {
 		try {
 			Map<String, Class<?>> compiledClasses = compileClasses(sources);
 			return compiledClasses.get(className);
-		}catch(Exception e){
+		} catch (CompilerException e) {
+			throw e;
+		} catch (Exception e) {
 			throw new CompilerException("Could not compile sources", e);
 		}
 	}
 
-	public <T> Map<String, Class<?>> compileClasses(Map<String, T> sources) throws IOException, ClassNotFoundException {
+	public <T> Map<String, Class<?>> compileClasses(Map<String, T> sources) throws IOException, ClassNotFoundException, CompilerException {
 
 		List<JavaFileObject> compilationUnits = Lists.newArrayList();
 		sources.forEach((name, input) -> {
@@ -55,15 +58,20 @@ public class SimpleJavaCompiler implements InflightCompiler {
 			compilationUnits.add(compilationUnit);
 		});
 
+		StringWriter out = new StringWriter();
 		JavaCompiler.CompilationTask compilationTask = compiler.getTask(
-				/*out=*/null,
+				out,
 				fileManager, 
 				/*diagnoticListener=*/null, 
 				/*options=*/null, 
 				/*classes*/null,
 				compilationUnits);
 
-		compilationTask.call();
+		boolean compilationSucceeded = compilationTask.call();
+
+		if (!compilationSucceeded) {
+			throw new CompilerException(out.toString());
+		}
 
 		Map<String, Class<?>> compiledClasses = Maps.newHashMap();
 
@@ -72,11 +80,11 @@ public class SimpleJavaCompiler implements InflightCompiler {
 			Class<?> compiledClass = loadClass(name, javaFileObject.getBytes());
 			compiledClasses.put(name, compiledClass);
 		}
-		
+
 		return compiledClasses;
 	}
-	
-	private Class<?> loadClass(String className, byte[] bytes) throws ClassNotFoundException{
+
+	private Class<?> loadClass(String className, byte[] bytes) throws ClassNotFoundException {
 		URLClassLoader classLoader = new URLClassLoader(new URL[]{}, SimpleJavaCompiler.class.getClassLoader()) {
 			@Override
 			protected Class<?> findClass(String name) throws ClassNotFoundException {

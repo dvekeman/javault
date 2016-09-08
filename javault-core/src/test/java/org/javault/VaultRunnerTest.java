@@ -77,10 +77,33 @@ public class VaultRunnerTest {
 	}
 
 	@Test
-	public void testRunScript() throws VaultException, UnsupportedEncodingException {
-		String helloWorldAsScript = "" +
-				"    System.out.println(\"Hello World, a script, from a generated program!\");\n";
-		VaultOutput output = vaultRunner.runInVault0(helloWorldAsScript);
-		assertEquals("Hello World, a script, from a generated program!\n", output.getSysout());
+	public void testRunSnippet() throws VaultException, UnsupportedEncodingException {
+		String helloWorldAsSnippet = "" +
+				"    System.out.println(\"Hello World, a snippet, from a generated program!\");\n";
+		VaultOutput output = vaultRunner.runInVault0(helloWorldAsSnippet);
+		assertEquals("Hello World, a snippet, from a generated program!\n", output.getSysout());
+	}
+
+	@Test
+	public void testRunRubbish() throws VaultException, UnsupportedEncodingException {
+		String helloWorldAsSnippet = "" +
+				"    I don't compile\n";
+		String expectedCompilationIssue = 
+				"/VaultSnippetExecution.java:3: error: unclosed character literal\n" +
+				"        I don't compile\n" +
+				"             ^\n" +
+				"/VaultSnippetExecution.java:3: error: not a statement\n" +
+				"        I don't compile\n" +
+				"                ^\n" +
+				"/VaultSnippetExecution.java:3: error: ';' expected\n" +
+				"        I don't compile\n" +
+				"                       ^\n" +
+				"3 errors\n";
+		
+		try {
+			vaultRunner.runInVault0(helloWorldAsSnippet);
+		} catch(VaultCompilerException vce){
+			assertEquals(expectedCompilationIssue, vce.getCompilationMessage());
+		}
 	}
 }

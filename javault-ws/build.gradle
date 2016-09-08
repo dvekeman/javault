@@ -47,7 +47,7 @@ task copyPolicy(type: Copy) {
 cargo {
     
     containerId = 'tomcat8x'
-    port = 8080
+    port = 9090
 
     deployable {
         context = 'javault-ws'
@@ -60,6 +60,7 @@ cargo {
             '-Djava.security.policy=${catalina.home}/conf/all.policy'
         containerProperties {
             property 'cargo.tomcat.httpSecure', true
+            property 'cargo.tomcat.ajp.port', 9009
         }
     }
 }

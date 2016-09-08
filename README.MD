@@ -32,6 +32,10 @@ See README.MD inside
 
 ### Examples
 
-![Alt text](https://github.com/dvekeman/javault/blob/master/doc/img/javault-runner-example1.png "Command line usage (javault-runner)")
+![Command line usage](https://github.com/dvekeman/javault/blob/master/doc/img/javault-runner-example1.png "Command line usage (javault-runner)")
 
-![Alt text](https://github.com/dvekeman/javault/blob/master/doc/img/javault-ws-example1.png "Web Service usage (javault-ws)")
+![Web Service usage](https://github.com/dvekeman/javault/blob/master/doc/img/javault-ws-example1.png "Web Service usage (javault-ws)")
+
+![Web Service compilation exception](https://github.com/dvekeman/javault/blob/master/doc/img/javault-ws-example2.png "Web Service usage with compilation exception (javault-ws)")
+
+![Web Service access denied exception](https://github.com/dvekeman/javault/blob/master/doc/img/javault-ws-example3.png "Web Service usage with unpermitted access exception (javault-ws)")

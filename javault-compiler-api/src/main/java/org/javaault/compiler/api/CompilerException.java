@@ -4,4 +4,8 @@ public class CompilerException extends Exception {
 	public CompilerException(String msg, Throwable cause) {
 		super(msg, cause);
 	}
+	
+	public CompilerException(String msg){
+		super(msg);
+	}
 }

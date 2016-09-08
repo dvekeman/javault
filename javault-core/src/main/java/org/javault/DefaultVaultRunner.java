@@ -54,7 +54,7 @@ public class DefaultVaultRunner implements VaultRunner {
 			Runnable r = loadUntrusted(clazz);
 			return internalRunInVault(r);
 		} catch (CompilerException ce) {
-			throw new VaultException(String.format("Unable to compile the source code for %s", className), ce);
+			throw new VaultCompilerException(String.format("Unable to compile the source code for %s", className), ce);
 		}
 	}
 
@@ -64,15 +64,15 @@ public class DefaultVaultRunner implements VaultRunner {
 	}
 
 	@Override
-	public VaultOutput runInVault0(String source) throws VaultException {
-		String tempClassName = "TempVaultExec";
+	public VaultOutput runInVault0(String snippet) throws VaultException {
+		String tempClassName = "VaultSnippetExecution";
 		String tempHost = "" +
 				"public class %s implements Runnable {\n" +
 				"  public void run() {\n" +
 				"    %s" +
 				"  }\n" +
 				"}\n";
-		return runInVault0(tempClassName, String.format(tempHost, tempClassName, source));
+		return runInVault0(tempClassName, String.format(tempHost, tempClassName, snippet));
 	}
 
 	private VaultOutput internalRunInVault(Runnable runnable) throws VaultException {

@@ -23,5 +23,5 @@ public interface VaultRunner {
 	
 	VaultOutput runInVault0(Runnable runnable) throws VaultException;
 	
-	VaultOutput runInVault0(String source) throws VaultException;
+	VaultOutput runInVault0(String snippet) throws VaultException;
 }

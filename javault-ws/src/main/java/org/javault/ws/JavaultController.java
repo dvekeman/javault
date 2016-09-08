@@ -3,6 +3,7 @@ package org.javault.ws;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.javault.DefaultVaultRunner;
+import org.javault.VaultCompilerException;
 import org.javault.VaultException;
 import org.javault.VaultOutput;
 import org.javault.VaultRunner;
@@ -48,11 +49,11 @@ public class JavaultController {
 		return doRunInVault0(name, source);
 	}
 
-	@RequestMapping(path = "/runScriptInVault0", method = RequestMethod.POST)
-	public String postRunScriptInVault0(
+	@RequestMapping(path = "/runSnippetInVault0", method = RequestMethod.POST)
+	public String postRunSnippetInVault0(
 			@RequestBody String source) throws HttpVaultException {
 		LOG.debug("source: " + source);
-		return doRunScriptInVault0(source);
+		return doRunSnippetInVault0(source);
 	}
 
 	private String doRunInVault0(String name, String source) throws HttpVaultException {
@@ -71,7 +72,7 @@ public class JavaultController {
 		}
 	}
 
-	private String doRunScriptInVault0(String source) throws HttpVaultException {
+	private String doRunSnippetInVault0(String source) throws HttpVaultException {
 		//TODO: wrap in service
 		VaultRunner vaultRunner = new DefaultVaultRunner();
 		try {
@@ -82,6 +83,9 @@ public class JavaultController {
 			}
 			System.out.println("SYSOUT:");
 			return output.getSysout();
+		} catch (VaultCompilerException ve) {
+			return ve.getCompilationMessage();
+			//throw new HttpVaultException(ve.getCompilationMessage());
 		} catch (VaultException ve) {
 			throw new HttpVaultException(ve);
 		}
