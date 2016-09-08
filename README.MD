@@ -32,10 +32,14 @@ See README.MD inside
 
 ### Examples
 
+#### Example 1: Run a snippet using the command line runner
+
 ![Command line usage](https://github.com/dvekeman/javault/blob/master/doc/img/javault-runner-example1.png "Command line usage (javault-runner)")
+
+#### Example 2: Run code that breaches the security (e.g. listing the files in the directory).
 
 ![Web Service usage](https://github.com/dvekeman/javault/blob/master/doc/img/javault-ws-example1.png "Web Service usage (javault-ws)")
 
-![Web Service compilation exception](https://github.com/dvekeman/javault/blob/master/doc/img/javault-ws-example2.png "Web Service usage with compilation exception (javault-ws)")
+#### Example 3: Run a code snippet that does not compile.
 
-![Web Service access denied exception](https://github.com/dvekeman/javault/blob/master/doc/img/javault-ws-example3.png "Web Service usage with unpermitted access exception (javault-ws)")
+![Web Service compilation exception](https://github.com/dvekeman/javault/blob/master/doc/img/javault-ws-example2.png "Web Service usage with compilation exception (javault-ws)")
