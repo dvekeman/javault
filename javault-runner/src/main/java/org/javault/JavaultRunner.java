@@ -1,5 +1,7 @@
 package org.javault;
 
+import java.util.Scanner;
+
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -13,11 +15,16 @@ public class JavaultRunner implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) {
-		if (args.length == 0 || args[0].equals("exitcode")) {
-			printUsage();
-			System.exit(1);
+		if (args.length == 0) {
+			try {
+				runFromInput();
+				System.exit(0);
+			} catch (VaultException ve) {
+				ve.printStackTrace();
+				System.exit(1);
+			}
 		}
-		
+
 		try {
 			VaultOutput output = null; 
 			if (args.length == 1) {
@@ -34,6 +41,39 @@ public class JavaultRunner implements CommandLineRunner {
 			printUsage();
 			System.exit(1);
 		}
+	}
+
+	private void runFromInput() throws VaultException {
+		System.out.println("Enter your snippet code. When finished press Ctrl-D");
+		System.out.println("For example:");
+		System.out.println(
+				"=================================================\n" +
+				"int sum = 0;\n" +
+				"for(int i = 0; i < 5; i++){\n" +
+				"\tSystem.out.println(\"i: \" + i);\n" +
+				"\tsum += i;\n" +
+				"}\n" +
+				"System.out.println(\"Sum: \" + sum);\n" +
+				"<ENTER>\n" +
+				"CTRL-D\n" +
+				"=================================================\n"
+		);
+
+		Scanner scan = new Scanner(System.in);
+		StringBuilder sb = new StringBuilder();
+		try {
+			while (scan.hasNextLine()){
+				String line = scan.nextLine();
+				sb.append(line);
+			}
+		} finally {
+			scan.close();
+		}
+
+		String source = sb.toString();
+		VaultOutput output = vaultRunner.runInVault0(source);
+
+		System.out.println(output.getSysout());
 	}
 
 	public static void main(String[] args) throws Exception {
