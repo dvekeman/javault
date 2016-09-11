@@ -55,16 +55,24 @@ public class JavaultRunner implements CommandLineRunner {
 				"}\n" +
 				"System.out.println(\"Sum: \" + sum);\n" +
 				"<ENTER>\n" +
-				"CTRL-D\n" +
+				"<ENTER>\n" +
 				"=================================================\n"
 		);
 
 		Scanner scan = new Scanner(System.in);
 		StringBuilder sb = new StringBuilder();
 		try {
+			boolean done = false;
 			while (scan.hasNextLine()){
 				String line = scan.nextLine();
 				sb.append(line);
+				if(done && "".equals(line)){
+					break;
+				} else if(!done && "".equals(line)){
+					done = true;
+				} else {
+					done = false;
+				}
 			}
 		} finally {
 			scan.close();

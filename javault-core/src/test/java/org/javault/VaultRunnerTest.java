@@ -60,45 +60,45 @@ public class VaultRunnerTest {
 
 		VaultOutput output = vaultRunner.runInVault0(Lists.newArrayList(evilCodeDirectory), "org.javault.HolyCode");
 		//TODO: FIXME: Initialization output should also be part of the result!
-//		assertEquals("I am initializing.\nI am running! Whoohoo!\nI did it!\n", output.getSysout());
-		assertEquals("I am running! Whoohoo!\nI did it!\n", output.getSysout());
+//		assertEquals("I am initializing." + System.lineSeparator() + "I am running! Whoohoo!" + System.lineSeparator() + "I did it!" + System.lineSeparator() + "", output.getSysout());
+		assertEquals("I am running! Whoohoo!" + System.lineSeparator() + "I did it!" + System.lineSeparator() + "", output.getSysout());
 	}
 
 	@Test
 	public void testRunFromSource() throws VaultException, UnsupportedEncodingException {
 		String helloWorld = "" +
-				"public class HelloWorld implements Runnable {\n" +
-				"  public void run() {\n" +
-				"    System.out.println(\"Hello World, from a generated program!\");\n" +
-				"  }\n" +
-				"}\n";
+				"public class HelloWorld implements Runnable {" + System.lineSeparator() + "" +
+				"  public void run() {" + System.lineSeparator() + "" +
+				"    System.out.println(\"Hello World, from a generated program!\");" + System.lineSeparator() + "" +
+				"  }" + System.lineSeparator() + "" +
+				"}" + System.lineSeparator() + "";
 		VaultOutput output = vaultRunner.runInVault0("HelloWorld", helloWorld);
-		assertEquals("Hello World, from a generated program!\n", output.getSysout());
+		assertEquals("Hello World, from a generated program!" + System.lineSeparator() + "", output.getSysout());
 	}
 
 	@Test
 	public void testRunSnippet() throws VaultException, UnsupportedEncodingException {
 		String helloWorldAsSnippet = "" +
-				"    System.out.println(\"Hello World, a snippet, from a generated program!\");\n";
+				"    System.out.println(\"Hello World, a snippet, from a generated program!\");" + System.lineSeparator() + "";
 		VaultOutput output = vaultRunner.runInVault0(helloWorldAsSnippet);
-		assertEquals("Hello World, a snippet, from a generated program!\n", output.getSysout());
+		assertEquals("Hello World, a snippet, from a generated program!" + System.lineSeparator() + "", output.getSysout());
 	}
 
 	@Test
 	public void testRunRubbish() throws VaultException, UnsupportedEncodingException {
 		String helloWorldAsSnippet = "" +
-				"    I don't compile\n";
+				"    I don't compile" + System.lineSeparator() + "" + System.lineSeparator();
 		String expectedCompilationIssue = 
-				"/VaultSnippetExecution.java:3: error: unclosed character literal\n" +
-				"        I don't compile\n" +
-				"             ^\n" +
-				"/VaultSnippetExecution.java:3: error: not a statement\n" +
-				"        I don't compile\n" +
-				"                ^\n" +
-				"/VaultSnippetExecution.java:3: error: ';' expected\n" +
-				"        I don't compile\n" +
-				"                       ^\n" +
-				"3 errors\n";
+				"/VaultSnippetExecution.java:3: error: unclosed character literal" + System.lineSeparator() + "" +
+				"        I don't compile" + System.lineSeparator() + "" +
+				"             ^" + System.lineSeparator() + "" +
+				"/VaultSnippetExecution.java:3: error: not a statement" + System.lineSeparator() + "" +
+				"        I don't compile" + System.lineSeparator() + "" +
+				"                ^" + System.lineSeparator() + "" +
+				"/VaultSnippetExecution.java:3: error: ';' expected" + System.lineSeparator() + "" +
+				"        I don't compile" + System.lineSeparator() + "" +
+				"                       ^" + System.lineSeparator() + "" +
+				"3 errors" + System.lineSeparator() + "";
 		
 		try {
 			vaultRunner.runInVault0(helloWorldAsSnippet);
