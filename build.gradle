@@ -43,5 +43,9 @@ subprojects {
         }
     }
     check.dependsOn jacocoTestReport
+    
+    javadoc {
+        destinationDir = project.rootProject.file("doc/api")
+    }
 }
 
