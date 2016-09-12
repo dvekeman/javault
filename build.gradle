@@ -44,8 +44,16 @@ subprojects {
     }
     check.dependsOn jacocoTestReport
     
-    javadoc {
-        destinationDir = project.rootProject.file("doc/api")
-    }
 }
 
+def exportedProjects= [
+        ":javault-core",
+        ":javault-compiler-api",
+        ":javault-simple-compiler",
+]
+
+task alljavadoc(type: Javadoc) {
+    source exportedProjects.collect { project(it).sourceSets.main.allJava }
+    classpath = files(exportedProjects.collect { project(it).sourceSets.main.compileClasspath })
+    destinationDir = file("doc/api")
+}

@@ -1,1 +1,3 @@
-org.javault.ws
+org.javaault.compiler.api
+org.javault
+org.javault.simplecompiler
