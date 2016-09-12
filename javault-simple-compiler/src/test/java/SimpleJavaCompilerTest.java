@@ -25,11 +25,11 @@ public class SimpleJavaCompilerTest {
 	@Test
 	public void testCompileHelloWorld() throws IOException, CompilerException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
 		String helloWorld = "" +
-				"public class HelloWorld {\n" +
-				"  public static void main(String[] args) {\n" +
-				"    System.out.println(\"Hello World, from a generated program!\");\n" +
-				"  }\n" +
-				"}\n";
+				"public class HelloWorld {" + System.lineSeparator() + "" +
+				"  public static void main(String[] args) {" + System.lineSeparator() + "" +
+				"    System.out.println(\"Hello World, from a generated program!\");" + System.lineSeparator() + "" +
+				"  }" + System.lineSeparator() + "" +
+				"}" + System.lineSeparator() + "";
 
 		Class<?> codeGenTest = simpleJavaCompiler.compileSource("HelloWorld", helloWorld);
 
@@ -43,6 +43,6 @@ public class SimpleJavaCompilerTest {
 		
 		String generatedOutput = baos.toString("UTF-8");
 		
-		assertEquals("Hello World, from a generated program!\n", generatedOutput);
+		assertEquals("Hello World, from a generated program!" + System.lineSeparator() + "", generatedOutput);
 	}
 }
