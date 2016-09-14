@@ -1,9 +1,11 @@
 package org.javault.ws;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.javault.DefaultVaultRunner;
-import org.javault.VaultCompilerException;
 import org.javault.VaultException;
 import org.javault.VaultOutput;
 import org.javault.VaultRunner;
@@ -30,64 +32,63 @@ public class JavaultController {
 	}
 
 	@RequestMapping(path = "/runInVault0")
-	public String getRunInVault0(
+	public WsVaultOutput getRunInVault0(
 			@RequestParam(value = "name", defaultValue = "HelloWorld") String name,
 			@RequestParam(value = "source", defaultValue = "public class HelloWorld implements Runnable {\n" +
 					"  public void run() {\n" +
 					"    System.out.println(\"Hello World, from a generated program!\");\n" +
 					"  }\n" +
-					"}\n") String source) throws HttpVaultException {
+					"}\n") String source) throws HttpVaultException, GenericException {
 		return doRunInVault0(name, source);
 	}
 
 	@RequestMapping(path = "/runInVault0", method = RequestMethod.POST)
-	public String postRunInVault0(
+	public WsVaultOutput postRunInVault0(
 			@RequestParam(value = "name") String name,
-			@RequestBody String source) throws HttpVaultException {
+			@RequestBody String source) throws HttpVaultException, GenericException {
 		LOG.debug("name: " + name);
 		LOG.debug("source: " + source);
 		return doRunInVault0(name, source);
 	}
 
 	@RequestMapping(path = "/runSnippetInVault0", method = RequestMethod.POST)
-	public String postRunSnippetInVault0(
-			@RequestBody String source) throws HttpVaultException {
+	public WsVaultOutput postRunSnippetInVault0(
+			@RequestBody String source) throws HttpVaultException, GenericException {
 		LOG.debug("source: " + source);
 		return doRunSnippetInVault0(source);
 	}
 
-	private String doRunInVault0(String name, String source) throws HttpVaultException {
+	private WsVaultOutput doRunInVault0(String name, String source) throws HttpVaultException, GenericException {
 		//TODO: wrap in service
 		VaultRunner vaultRunner = new DefaultVaultRunner();
 		try {
-			VaultOutput output = vaultRunner.runInVault0(name, source);
-			if(output.getSyserr() != null && !"".equals(output.getSyserr())){
-				System.err.println("SYSERR:");
-				output.getSyserr();
-			}
-			System.out.println("SYSOUT:");
-			return output.getSysout();
+			VaultOutput output = vaultRunner.runInVault0(name, source).get(60, TimeUnit.SECONDS);
+			return new WsVaultOutput(output.getStatusCode(), output.getOutput());
 		} catch (VaultException ve) {
 			throw new HttpVaultException(ve);
+		} catch (InterruptedException ve) {
+			throw new GenericException(ve);
+		} catch (ExecutionException ve) {
+			throw new GenericException(ve);
+		} catch (TimeoutException ve) {
+			throw new GenericException(ve);
 		}
 	}
 
-	private String doRunSnippetInVault0(String source) throws HttpVaultException {
+	private WsVaultOutput doRunSnippetInVault0(String source) throws HttpVaultException, GenericException {
 		//TODO: wrap in service
 		VaultRunner vaultRunner = new DefaultVaultRunner();
 		try {
-			VaultOutput output = vaultRunner.runInVault0(source);
-			if(output.getSyserr() != null && !"".equals(output.getSyserr())){
-				System.err.println("SYSERR:");
-				output.getSyserr();
-			}
-			System.out.println("SYSOUT:");
-			return output.getSysout();
-		} catch (VaultCompilerException ve) {
-			return ve.getCompilationMessage();
-			//throw new HttpVaultException(ve.getCompilationMessage());
+			VaultOutput output = vaultRunner.runInVault0(source).get(60, TimeUnit.SECONDS);
+			return new WsVaultOutput(output.getStatusCode(), output.getOutput());
 		} catch (VaultException ve) {
 			throw new HttpVaultException(ve);
+		} catch (InterruptedException ve) {
+			throw new GenericException(ve);
+		} catch (ExecutionException ve) {
+			throw new GenericException(ve);
+		} catch (TimeoutException ve) {
+			throw new GenericException(ve);
 		}
 	}
 

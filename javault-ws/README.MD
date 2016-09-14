@@ -52,20 +52,20 @@ Some notes:
 
 Here is a second example: 
 
-    curl -X POST -H"Content-Type:text/plain" http://localhost:8080/javault-ws/runInVault0?name=Counter -d @javault-ws/testfiles/Counter.java
+    curl -X POST -H"Content-Type:text/plain" http://localhost:8080/javault-ws/runInVault0?name=Counter -d @javault-ws/testfiles/Counter.java | python -m json.tool
     
 Here is an example which fails because we try to read file: 
 
-    curl -X POST -H"Content-Type:text/plain" http://localhost:8080/javault-ws/runInVault0?name=Pwd -d @javault-ws/testfiles/Pwd.java
+    curl -X POST -H"Content-Type:text/plain" http://localhost:8080/javault-ws/runInVault0?name=Pwd -d @javault-ws/testfiles/Pwd.java | python -m json.tool
 
 ## Provide a PLAIN TEXT (snippet) as input
 
-    curl -X POST -H"Content-Type:text/plain" http://localhost:8080/javault-ws/runSnippetInVault0 -d @javault-ws/testfiles/CounterSnippet.txt
+    curl -X POST -H"Content-Type:text/plain" http://localhost:8080/javault-ws/runSnippetInVault0 -d @javault-ws/testfiles/CounterSnippet.txt | python -m json.tool
 
 Same as above but as oneliner
 
-    curl -X POST -H"Content-Type:text/plain" http://localhost:8080/javault-ws/runSnippetInVault0 -d 'int sum = 0;int product = 1;for(int i = 1; i <= 10; i++){    System.out.println("i = " + i);    sum += i;    product *= i;}System.out.println("sum = " + sum);System.out.println("product = " + product);'
+    curl -X POST -H"Content-Type:text/plain" http://localhost:8080/javault-ws/runSnippetInVault0 -d 'int sum = 0;int product = 1;for(int i = 1; i <= 10; i++){    System.out.println("i = " + i);    sum += i;    product *= i;}System.out.println("sum = " + sum);System.out.println("product = " + product);'  | python -m json.tool
 
 Code that doesn't compile
 
-    curl -X POST -H"Content-Type:text/plain" http://localhost:8080/javault-ws/runSnippetInVault0 -d 'I do not compile!'
+    curl -X POST -H"Content-Type:text/plain" http://localhost:8080/javault-ws/runSnippetInVault0 -d 'I do not compile!'  | python -m json.tool

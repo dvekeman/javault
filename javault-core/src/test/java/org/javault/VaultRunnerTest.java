@@ -1,10 +1,15 @@
 package org.javault;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.AccessControlException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -42,45 +47,52 @@ public class VaultRunnerTest {
 		vaultRunner.runInVault0(() -> System.out.println("Blah"));
 	}
 
-	@Test(expected = VaultException.class)
-	public void testLoadEvilCode() throws VaultException, MalformedURLException, UnsupportedEncodingException {
+	@Test
+	public void testLoadEvilCode() throws VaultException, MalformedURLException, UnsupportedEncodingException, InterruptedException, ExecutionException, TimeoutException {
 		LOG.info("Running evil code. Update the VaultRunner#allowedPermissionsAcc");
 
 		// Trailing slash is important to mark it as a directory to the classloader
 		URL evilCodeDirectory = this.getClass().getClassLoader().getResource("org/javault/");
 
 		// Run the code in the vault
-		vaultRunner.runInVault0(Lists.newArrayList(evilCodeDirectory), "org.javault.EvilCode");
+		VaultOutput output = vaultRunner.runInVault0(Lists.newArrayList(evilCodeDirectory), "org.javault.EvilCode").get(60, TimeUnit.SECONDS);
+		output.getExceptions().stream().forEach(o ->
+				System.out.println(((Throwable)o).getCause().getMessage())
+		);
+		assertTrue(output.getExceptions().stream().anyMatch(o ->
+				o instanceof VaultRunException &&
+				((Throwable)o).getCause() instanceof AccessControlException));
+		assertEquals("access denied (\"java.io.FilePermission\" \"evil.txt\" \"read\")", output.getOutput());
 	}
 
 	@Test
-	public void testHolyCode() throws VaultException, MalformedURLException, UnsupportedEncodingException {
+	public void testHolyCode() throws VaultException, MalformedURLException, UnsupportedEncodingException, ExecutionException, InterruptedException {
 		// Trailing slash is important to mark it as a directory to the classloader
 		URL evilCodeDirectory = this.getClass().getClassLoader().getResource("org/javault/");
 
-		VaultOutput output = vaultRunner.runInVault0(Lists.newArrayList(evilCodeDirectory), "org.javault.HolyCode");
+		VaultOutput output = vaultRunner.runInVault0(Lists.newArrayList(evilCodeDirectory), "org.javault.HolyCode").get();
 		//TODO: FIXME: Initialization output should also be part of the result!
 //		assertEquals("I am initializing." + System.lineSeparator() + "I am running! Whoohoo!" + System.lineSeparator() + "I did it!" + System.lineSeparator() + "", output.getSysout());
 		assertEquals("I am running! Whoohoo!" + System.lineSeparator() + "I did it!" + System.lineSeparator() + "", output.getSysout());
 	}
 
 	@Test
-	public void testRunFromSource() throws VaultException, UnsupportedEncodingException {
+	public void testRunFromSource() throws VaultException, UnsupportedEncodingException, ExecutionException, InterruptedException {
 		String helloWorld = "" +
 				"public class HelloWorld implements Runnable {" + System.lineSeparator() + "" +
 				"  public void run() {" + System.lineSeparator() + "" +
 				"    System.out.println(\"Hello World, from a generated program!\");" + System.lineSeparator() + "" +
 				"  }" + System.lineSeparator() + "" +
 				"}" + System.lineSeparator() + "";
-		VaultOutput output = vaultRunner.runInVault0("HelloWorld", helloWorld);
+		VaultOutput output = vaultRunner.runInVault0("HelloWorld", helloWorld).get();
 		assertEquals("Hello World, from a generated program!" + System.lineSeparator() + "", output.getSysout());
 	}
 
 	@Test
-	public void testRunSnippet() throws VaultException, UnsupportedEncodingException {
+	public void testRunSnippet() throws VaultException, UnsupportedEncodingException, ExecutionException, InterruptedException {
 		String helloWorldAsSnippet = "" +
 				"    System.out.println(\"Hello World, a snippet, from a generated program!\");" + System.lineSeparator() + "";
-		VaultOutput output = vaultRunner.runInVault0(helloWorldAsSnippet);
+		VaultOutput output = vaultRunner.runInVault0(helloWorldAsSnippet).get();
 		assertEquals("Hello World, a snippet, from a generated program!" + System.lineSeparator() + "", output.getSysout());
 	}
 

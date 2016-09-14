@@ -1,7 +1,11 @@
 package org.javault;
 
 import java.util.Scanner;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
+import org.apache.commons.cli.Options;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -15,11 +19,13 @@ public class JavaultRunner implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) {
+		Options options = new Options();
+
 		if (args.length == 0) {
 			try {
 				runFromInput();
 				System.exit(0);
-			} catch (VaultException ve) {
+			}catch(VaultException | InterruptedException | ExecutionException | TimeoutException ve){
 				ve.printStackTrace();
 				System.exit(1);
 			}
@@ -28,22 +34,21 @@ public class JavaultRunner implements CommandLineRunner {
 		try {
 			VaultOutput output = null; 
 			if (args.length == 1) {
-				output = vaultRunner.runInVault0(args[0]);
-//			} else if(args.length == 2){
-//				output = vaultRunner.runInVault0(args[0], args[1]);
+				output = vaultRunner.runInVault0(args[0]).get(60, TimeUnit.SECONDS);
 			} else {
 				printUsage();
 				throw new VaultException("Too many arguments provided.");
 			}
-			System.out.println(output.getSysout());
-		}catch(VaultException ve){
+			System.out.println(output.getOutput());
+		}catch(VaultException | InterruptedException | ExecutionException | TimeoutException ve){
 			ve.printStackTrace();
 			printUsage();
 			System.exit(1);
 		}
+		System.exit(0);
 	}
 
-	private void runFromInput() throws VaultException {
+	private void runFromInput() throws VaultException, InterruptedException, ExecutionException, TimeoutException {
 		System.out.println("Enter your snippet code. When finished press Ctrl-D");
 		System.out.println("For example:");
 		System.out.println(
@@ -79,7 +84,7 @@ public class JavaultRunner implements CommandLineRunner {
 		}
 
 		String source = sb.toString();
-		VaultOutput output = vaultRunner.runInVault0(source);
+		VaultOutput output = vaultRunner.runInVault0(source).get(60, TimeUnit.SECONDS);
 
 		System.out.println(output.getSysout());
 	}

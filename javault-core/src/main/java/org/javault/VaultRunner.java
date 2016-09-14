@@ -2,6 +2,7 @@ package org.javault;
 
 import java.net.URL;
 import java.util.List;
+import java.util.concurrent.Future;
 
 public interface VaultRunner {
 	/**
@@ -23,7 +24,7 @@ public interface VaultRunner {
 	 * @return The output result, system out and system error    
 	 * @throws VaultException
 	 */
-	VaultOutput runInVault0(List<URL> paths, String runnableClass) throws VaultException;
+	Future<VaultOutput> runInVault0(List<URL> paths, String runnableClass) throws VaultException;
 
 	/**
 	 * Run code in a controlled environment. The input is a class name and the source code for the class
@@ -43,7 +44,7 @@ public interface VaultRunner {
 	 * @return The output result, system out and system error    
 	 * @throws VaultException
 	 */
-	VaultOutput runInVault0(String className, String source) throws VaultException;
+	Future<VaultOutput> runInVault0(String className, String source) throws VaultException;
 
 	/**
 	 * Run code in a controlled environment. The input is a Runnable class.
@@ -62,7 +63,7 @@ public interface VaultRunner {
 	 * @return The output result, system out and system error    
 	 * @throws VaultException
 	 */
-	VaultOutput runInVault0(Runnable runnable) throws VaultException;
+	Future<VaultOutput> runInVault0(Runnable runnable) throws VaultException;
 
 	/**
 	 * Run code in a controlled environment. The input is a snippet (code without wrapping class)
@@ -81,5 +82,5 @@ public interface VaultRunner {
 	 * @return
 	 * @throws VaultException
 	 */
-	VaultOutput runInVault0(String snippet) throws VaultException;
+	Future<VaultOutput> runInVault0(String snippet) throws VaultException;
 }

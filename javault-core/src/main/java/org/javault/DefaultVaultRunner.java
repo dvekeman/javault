@@ -16,6 +16,10 @@ import java.security.PrivilegedExceptionAction;
 import java.security.ProtectionDomain;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.javaault.compiler.api.CompilerException;
 import org.javaault.compiler.api.InflightCompiler;
@@ -30,6 +34,7 @@ public class DefaultVaultRunner implements VaultRunner {
 	private static final Logger LOG = LoggerFactory.getLogger(DefaultVaultRunner.class);
 
 	private static final AccessControlContext allowedPermissionsAcc;
+
 	static {
 		PermissionCollection allowedPermissions = new Permissions();
 		// <<< CHANGEME HERE
@@ -40,31 +45,37 @@ public class DefaultVaultRunner implements VaultRunner {
 				new ProtectionDomain(null, allowedPermissions)});
 	}
 
+	private final ExecutorService pool = Executors.newFixedThreadPool(10);
+
 	@Override
-	public VaultOutput runInVault0(List<URL> paths, String runnableClass) throws VaultException {
+	public Future<VaultOutput> runInVault0(List<URL> paths, String runnableClass) throws VaultException {
 		Runnable r = loadUntrusted(paths, runnableClass);
 		return internalRunInVault(r);
 	}
 
 	@Override
-	public VaultOutput runInVault0(String className, String source) throws VaultException {
+	public Future<VaultOutput> runInVault0(String className, String source) throws VaultException {
 		InflightCompiler inflightCompiler = new SimpleJavaCompiler();
 		try {
 			Class<Runnable> clazz = inflightCompiler.compileSource(className, source);
 			Runnable r = loadUntrusted(clazz);
 			return internalRunInVault(r);
 		} catch (CompilerException ce) {
-			throw new VaultCompilerException(String.format("Unable to compile the source code for %s", className), ce);
+			ByteArrayOutputStream syserr = new ByteArrayOutputStream();
+			new PrintStream(syserr).append(ce.getMessage()).flush();
+			return CompletableFuture.completedFuture(
+					new VaultOutput(null, new ByteArrayOutputStream(), syserr,
+							Lists.newArrayList(new VaultCompilerException(String.format("Unable to compile the source code for %s", className), ce))));
 		}
 	}
 
 	@Override
-	public VaultOutput runInVault0(Runnable runnable) throws VaultException {
+	public Future<VaultOutput> runInVault0(Runnable runnable) throws VaultException {
 		return internalRunInVault(runnable);
 	}
 
 	@Override
-	public VaultOutput runInVault0(String snippet) throws VaultException {
+	public Future<VaultOutput> runInVault0(String snippet) throws VaultException {
 		String tempClassName = "VaultSnippetExecution";
 		String tempHost = "" +
 				"public class %s implements Runnable {\n" +
@@ -75,7 +86,7 @@ public class DefaultVaultRunner implements VaultRunner {
 		return runInVault0(tempClassName, String.format(tempHost, tempClassName, snippet));
 	}
 
-	private VaultOutput internalRunInVault(Runnable runnable) throws VaultException {
+	private Future<VaultOutput> internalRunInVault(Runnable runnable) throws VaultException {
 		//Enforce that the security manager is enabled
 		SecurityManager securityManager = System.getSecurityManager();
 		LOG.debug("Security Manager: " + securityManager);
@@ -96,37 +107,42 @@ public class DefaultVaultRunner implements VaultRunner {
 	 * Run the code with limited priviliges (see allowedPermissions)
 	 * @param r The <code>Runnable</code> to execute
 	 */
-	private VaultOutput doRun(Runnable runnable) throws PrivilegedActionException {
-		try {
-			// Redirect the System.out to a custom outputstream
-			ByteArrayOutputStream sysout = new ByteArrayOutputStream();
-			ByteArrayOutputStream syserr = new ByteArrayOutputStream();
-			System.setOut(new PrintStream(sysout));
-			System.setErr(new PrintStream(syserr));
+	private Future<VaultOutput> doRun(Runnable runnable) throws PrivilegedActionException {
+		return pool.submit(() -> {
+			try {
+				// Redirect the System.out to a custom outputstream
+				ByteArrayOutputStream sysout = new ByteArrayOutputStream();
+				ByteArrayOutputStream syserr = new ByteArrayOutputStream();
+				System.setOut(new PrintStream(sysout));
+				System.setErr(new PrintStream(syserr));
 
-			AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
-				public Void run() throws InterruptedException, InternalVaultException {
-					final List<InternalVaultException> resultingException = Lists.newArrayList();
+				final List<VaultRunException> resultingException = Lists.newArrayList();
+				AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
+					public Void run() throws InterruptedException, VaultRunException {
 
-					Thread t = new Thread(runnable);
-					t.setUncaughtExceptionHandler((t1, e) ->
-							resultingException.add(new InternalVaultException("Uncaught exception on thread " + t1.getId(), e)));
-					t.start();
-					t.join();
-					if (resultingException.isEmpty()) {
+						Thread t = new Thread(runnable);
+						t.setUncaughtExceptionHandler((t1, e) ->
+								resultingException.add(new VaultRunException("Uncaught exception on thread " + t1.getId(), e)));
+						t.start();
+						t.join();
+//						if (resultingException.isEmpty()) {
+//							return null;
+//						} else {
+//							throw resultingException.get(0);
+//						}
+						LOG.debug("Sandbox code: DONE!");
 						return null;
-					} else {
-						throw resultingException.get(0);
 					}
-				}
-			}, allowedPermissionsAcc);
+				}, allowedPermissionsAcc);
 
-			return new VaultOutput(null, sysout, syserr);
-		} finally {
-			// Reset the System.out
-			System.setOut(new PrintStream(new FileOutputStream(FileDescriptor.out)));
-			System.setErr(new PrintStream(new FileOutputStream(FileDescriptor.err)));
-		}
+				LOG.debug("VaultRunner: DONE!");
+				return new VaultOutput(null, sysout, syserr, resultingException);
+			} finally {
+				// Reset the System.out
+				System.setOut(new PrintStream(new FileOutputStream(FileDescriptor.out)));
+				System.setErr(new PrintStream(new FileOutputStream(FileDescriptor.err)));
+			}
+		});
 	}
 
 	/*

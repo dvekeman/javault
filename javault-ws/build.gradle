@@ -47,7 +47,7 @@ task copyPolicy(type: Copy) {
 cargo {
     
     containerId = 'tomcat8x'
-    port = 9090
+    port = 8080
 
     deployable {
         context = 'javault-ws'
