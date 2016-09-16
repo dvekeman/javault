@@ -29,7 +29,7 @@ dependencies {
     }
 
     providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
-    
+
     compile("wsdl4j:wsdl4j:1.6.1")
 
     compile project(path: ":javault-core")
@@ -45,14 +45,14 @@ task copyPolicy(type: Copy) {
 }
 
 cargo {
-    
+
     containerId = 'tomcat8x'
-    port = 8080
+    port = 9090
 
     deployable {
         context = 'javault-ws'
     }
-    
+
     local {
         homeDir = file(TOMCAT8_HOME)
         jvmArgs =

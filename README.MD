@@ -1,6 +1,6 @@
 # Javault
 
-Interpret and run custom java code (source, class, jar) in a secure _vault_. The core vault asserts that 
+Interpret and run custom java code (source, class, jar) in a secure _vault_. The core vault asserts that
 the Security Manager is running and runs without any additional permissions.
 
 [![Build Status](https://travis-ci.org/dvekeman/javault.svg?branch=master)](https://travis-ci.org/dvekeman/javault)
@@ -26,20 +26,44 @@ Javault Core...
 - ... can run class files (from a provided directory)
 - ... can - not yet - run jar files
 
-See README.MD inside 
-[```javault-runner```](https://github.com/dvekeman/javault/blob/master/javault-runner/README.MD) and 
+See README.MD inside
+[```javault-runner```](https://github.com/dvekeman/javault/blob/master/javault-runner/README.MD) and
 [```javault-ws```](https://github.com/dvekeman/javault/blob/master/javault-ws/README.MD)
 
 ### Examples
 
-#### Example 1: Run a snippet using the command line runner
+#### Javault Runner
+
+Command line wrapper to _demonstrate_ the javault-core.
+
+##### Example 1: Run a snippet using the command line runner
 
 ![Command line usage](https://github.com/dvekeman/javault/blob/master/doc/img/javault-runner-example1.png "Command line usage (javault-runner)")
 
-#### Example 2: Run code that breaches the security (e.g. listing the files in the directory).
+#### Javault Web Service
+
+REST Web Service to _demonstrate_ the javault-core. Note this outputs JSON. For now the content of the json string includes line breaks as '\n' (depending on the system you ran the code on).
+
+##### Example 1: Just a hello world
 
 ![Web Service usage](https://github.com/dvekeman/javault/blob/master/doc/img/javault-ws-example1.png "Web Service usage (javault-ws)")
 
-#### Example 3: Run a code snippet that does not compile.
+##### Example 2: Counter snippet
 
-![Web Service compilation exception](https://github.com/dvekeman/javault/blob/master/doc/img/javault-ws-example2.png "Web Service usage with compilation exception (javault-ws)")
+![Web Service usage](https://github.com/dvekeman/javault/blob/master/doc/img/javault-ws-example2.png "Web Service usage (javault-ws)")
+
+##### Example 3: Run code that breaches the security (e.g. listing the files in the directory).
+
+![Web Service usage](https://github.com/dvekeman/javault/blob/master/doc/img/javault-ws-example3.png "Web Service usage (javault-ws)")
+
+##### Example 4: Plain text as input
+
+![Web Service compilation exception](https://github.com/dvekeman/javault/blob/master/doc/img/javault-ws-example4.png "Web Service usage with compilation exception (javault-ws)")
+
+##### Example 5: Same but as oneliner
+
+![Web Service compilation exception](https://github.com/dvekeman/javault/blob/master/doc/img/javault-ws-example5.png "Web Service usage with compilation exception (javault-ws)")
+
+##### Example 6: Code that doesn't compile
+
+![Web Service compilation exception](https://github.com/dvekeman/javault/blob/master/doc/img/javault-ws-example6.png "Web Service usage with compilation exception (javault-ws)")
