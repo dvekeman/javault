@@ -14,6 +14,9 @@ This codebase consists of a number of modules
 - ```javault-compiler-api```: small api module to allow switching backend compilers
 - ```javault-simple-compiler```: simple, naive implementation of the javault-compiler-api
 - ```javault-core```: core logic to compile (if needed) and run classes, jars, snippets, ...
+
+Example usages of this library can be found at [javault-examples](https://github.com/dvekeman/javault-examples)
+
 - ```javault-runner```: command line execution (see examples below)
 - ```javault-ws```: web service (REST) wrapper to call the javault as a service
 
@@ -28,8 +31,8 @@ Javault Core...
 - ... can - not yet - run jar files
 
 See README.MD inside
-[```javault-runner```](https://github.com/dvekeman/javault/blob/master/javault-runner/README.MD) and
-[```javault-ws```](https://github.com/dvekeman/javault/blob/master/javault-ws/README.MD)
+[```javault-runner```](https://github.com/dvekeman/javault-examples/blob/master/javault-runner/README.MD) and
+[```javault-ws```](https://github.com/dvekeman/javault-examples/blob/master/javault-ws/README.MD)
 
 ### Examples
 
