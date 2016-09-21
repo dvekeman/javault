@@ -3,10 +3,14 @@ package org.javault;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.io.FilePermission;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.security.AccessControlException;
+import java.util.PropertyPermission;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -32,7 +36,12 @@ public class VaultRunnerTest {
 
 	@Before
 	public void setup() {
-		vaultRunner = new DefaultVaultRunner();
+		System.setProperty("java.security.policy", "all.policy");
+		System.setSecurityManager(new SecurityManager());
+
+		vaultRunner = new DefaultVaultRunner.Builder()
+				.addPermission(new PropertyPermission("user.dir", "read"))
+				.build();
 	}
 
 	@Test(expected = VaultException.class)
@@ -62,7 +71,31 @@ public class VaultRunnerTest {
 		assertTrue(output.getExceptions().stream().anyMatch(o ->
 				o instanceof VaultRunException &&
 				((Throwable)o).getCause() instanceof AccessControlException));
-		assertEquals("access denied (\"java.io.FilePermission\" \"evil.txt\" \"read\")", output.getOutput());
+		assertEquals("access denied (\"java.io.FilePermission\" \"build/resources/test/evil.txt\" \"read\")", output.getOutput());
+	}
+
+	@Test
+	public void testLoadEvilCodeWithPermissions() throws VaultException, MalformedURLException, UnsupportedEncodingException, InterruptedException, ExecutionException, TimeoutException, URISyntaxException {
+		VaultRunner evilVaultRunner = new DefaultVaultRunner.Builder()
+				.addPermission(new FilePermission("build/resources/test/evil.txt", "read"))
+				.addPermission(new RuntimePermission("getClassLoader"))
+				.build();
+		
+		LOG.info("Running evil code with permissions");
+
+		// Trailing slash is important to mark it as a directory to the classloader
+		URL evilCodeDirectory = this.getClass().getClassLoader().getResource("org/javault/");
+		URL evilFileDirectory = Paths.get("build/resources/test").toUri().toURL();
+
+		// Run the code in the vault
+		VaultOutput output = evilVaultRunner.runInVault0(Lists.newArrayList(evilCodeDirectory, evilFileDirectory), "org.javault.EvilCode").get(60, TimeUnit.SECONDS);
+		System.out.println(output.getOutput());
+
+		output.getExceptions().stream().forEach(o ->
+				System.out.println(((Throwable)o).getCause().getMessage())
+		);
+		
+		assertEquals("I am running! Whoohoo!" + System.lineSeparator() + "hello underworld!" + System.lineSeparator(), output.getOutput());
 	}
 
 	@Test

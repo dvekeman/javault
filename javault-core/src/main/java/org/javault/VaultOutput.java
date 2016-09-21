@@ -41,8 +41,6 @@ public class VaultOutput<T> {
 
 	public String getOutput() {
 		switch (status) {
-			case SUCCESS:
-				return getSysout();
 			case FATAL:
 				StringBuilder output = new StringBuilder();
 				output.append(
@@ -58,7 +56,15 @@ public class VaultOutput<T> {
 				}
 				return output.toString();
 			default:
-				return getSysout() + System.lineSeparator() + getSyserr();
+				StringBuilder defaultOutput = new StringBuilder();
+				if (getSysout() != null && !"".equals(getSysout())) {
+					defaultOutput.append(getSysout());
+				}
+				if (getSyserr() != null && !"".equals(getSyserr())) {
+					defaultOutput.append(System.lineSeparator())
+							.append(getSyserr());
+				}
+				return defaultOutput.toString();
 		}
 	}
 

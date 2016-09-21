@@ -9,6 +9,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.security.AccessControlContext;
 import java.security.AccessController;
+import java.security.Permission;
 import java.security.PermissionCollection;
 import java.security.Permissions;
 import java.security.PrivilegedActionException;
@@ -33,19 +34,37 @@ public class DefaultVaultRunner implements VaultRunner {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DefaultVaultRunner.class);
 
-	private static final AccessControlContext allowedPermissionsAcc;
-
-	static {
-		PermissionCollection allowedPermissions = new Permissions();
-		// <<< CHANGEME HERE
-		//allowedPermissions.add(new java.io.FilePermission("evil.txt", "read"));
-		// >>>
-
-		allowedPermissionsAcc = new AccessControlContext(new ProtectionDomain[]{
-				new ProtectionDomain(null, allowedPermissions)});
-	}
+	private AccessControlContext accessControlContext;
 
 	private final ExecutorService pool = Executors.newFixedThreadPool(10);
+
+	private DefaultVaultRunner(AccessControlContext accessControlContext) {
+		this.accessControlContext = accessControlContext;
+	}
+	
+	public static class Builder {
+		PermissionCollection allowedPermissions = new Permissions();
+		public Builder() {
+		}
+
+		/**
+		 * allowedPermissions.add(new java.io.FilePermission("myfile.txt", "read"));
+		 * 
+		 * @param permission
+		 * @return
+		 */
+		public Builder addPermission(Permission permission){
+			allowedPermissions.add(permission);
+			return this;
+		}
+		
+		public VaultRunner build(){
+			AccessControlContext accessControlContext = new AccessControlContext(new ProtectionDomain[]{
+					new ProtectionDomain(null, allowedPermissions)});
+			return new DefaultVaultRunner(accessControlContext);
+		}
+
+	}
 
 	@Override
 	public Future<VaultOutput> runInVault0(List<URL> paths, String runnableClass) throws VaultException {
@@ -125,15 +144,10 @@ public class DefaultVaultRunner implements VaultRunner {
 								resultingException.add(new VaultRunException("Uncaught exception on thread " + t1.getId(), e)));
 						t.start();
 						t.join();
-//						if (resultingException.isEmpty()) {
-//							return null;
-//						} else {
-//							throw resultingException.get(0);
-//						}
 						LOG.debug("Sandbox code: DONE!");
 						return null;
 					}
-				}, allowedPermissionsAcc);
+				}, accessControlContext);
 
 				LOG.debug("VaultRunner: DONE!");
 				return new VaultOutput(null, sysout, syserr, resultingException);
