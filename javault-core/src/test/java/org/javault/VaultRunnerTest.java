@@ -3,6 +3,7 @@ package org.javault;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.io.FilePermission;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
@@ -66,12 +67,12 @@ public class VaultRunnerTest {
 		// Run the code in the vault
 		VaultOutput output = vaultRunner.runInVault0(Lists.newArrayList(evilCodeDirectory), "org.javault.EvilCode").get(60, TimeUnit.SECONDS);
 		output.getExceptions().stream().forEach(o ->
-				System.out.println(((Throwable)o).getCause().getMessage())
+				System.out.println(((Throwable) o).getCause().getMessage())
 		);
 		assertTrue(output.getExceptions().stream().anyMatch(o ->
 				o instanceof VaultRunException &&
-				((Throwable)o).getCause() instanceof AccessControlException));
-		assertEquals("access denied (\"java.io.FilePermission\" \"build/resources/test/evil.txt\" \"read\")", output.getOutput());
+						((Throwable) o).getCause() instanceof AccessControlException));
+		assertEquals("access denied (\"java.io.FilePermission\" \"build" + File.separator + "resources" + File.separator + "test" + File.separator + "evil.txt\" \"read\")", output.getOutput());
 	}
 
 	@Test
@@ -80,7 +81,7 @@ public class VaultRunnerTest {
 				.addPermission(new FilePermission("build/resources/test/evil.txt", "read"))
 				.addPermission(new RuntimePermission("getClassLoader"))
 				.build();
-		
+
 		LOG.info("Running evil code with permissions");
 
 		// Trailing slash is important to mark it as a directory to the classloader
@@ -92,9 +93,9 @@ public class VaultRunnerTest {
 		System.out.println(output.getOutput());
 
 		output.getExceptions().stream().forEach(o ->
-				System.out.println(((Throwable)o).getCause().getMessage())
+				System.out.println(((Throwable) o).getCause().getMessage())
 		);
-		
+
 		assertEquals("I am running! Whoohoo!" + System.lineSeparator() + "hello underworld!" + System.lineSeparator(), output.getOutput());
 	}
 
@@ -133,21 +134,21 @@ public class VaultRunnerTest {
 	public void testRunRubbish() throws VaultException, UnsupportedEncodingException {
 		String helloWorldAsSnippet = "" +
 				"    I don't compile" + System.lineSeparator() + "" + System.lineSeparator();
-		String expectedCompilationIssue = 
+		String expectedCompilationIssue =
 				"/VaultSnippetExecution.java:3: error: unclosed character literal" + System.lineSeparator() + "" +
-				"        I don't compile" + System.lineSeparator() + "" +
-				"             ^" + System.lineSeparator() + "" +
-				"/VaultSnippetExecution.java:3: error: not a statement" + System.lineSeparator() + "" +
-				"        I don't compile" + System.lineSeparator() + "" +
-				"                ^" + System.lineSeparator() + "" +
-				"/VaultSnippetExecution.java:3: error: ';' expected" + System.lineSeparator() + "" +
-				"        I don't compile" + System.lineSeparator() + "" +
-				"                       ^" + System.lineSeparator() + "" +
-				"3 errors" + System.lineSeparator() + "";
-		
+						"        I don't compile" + System.lineSeparator() + "" +
+						"             ^" + System.lineSeparator() + "" +
+						"/VaultSnippetExecution.java:3: error: not a statement" + System.lineSeparator() + "" +
+						"        I don't compile" + System.lineSeparator() + "" +
+						"                ^" + System.lineSeparator() + "" +
+						"/VaultSnippetExecution.java:3: error: ';' expected" + System.lineSeparator() + "" +
+						"        I don't compile" + System.lineSeparator() + "" +
+						"                       ^" + System.lineSeparator() + "" +
+						"3 errors" + System.lineSeparator() + "";
+
 		try {
 			vaultRunner.runInVault0(helloWorldAsSnippet);
-		} catch(VaultCompilerException vce){
+		} catch (VaultCompilerException vce) {
 			assertEquals(expectedCompilationIssue, vce.getCompilationMessage());
 		}
 	}
