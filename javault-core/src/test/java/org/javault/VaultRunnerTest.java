@@ -1,6 +1,8 @@
 package org.javault;
 
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -131,7 +133,7 @@ public class VaultRunnerTest {
 	}
 
 	@Test
-	public void testRunRubbish() throws VaultException, UnsupportedEncodingException {
+	public void testRunRubbish() throws VaultException, UnsupportedEncodingException, InterruptedException, ExecutionException, TimeoutException {
 		String helloWorldAsSnippet = "" +
 				"    I don't compile" + System.lineSeparator() + "" + System.lineSeparator();
 		String expectedCompilationIssue =
@@ -147,7 +149,8 @@ public class VaultRunnerTest {
 						"3 errors" + System.lineSeparator() + "";
 
 		try {
-			vaultRunner.runInVault0(helloWorldAsSnippet);
+			VaultOutput output = vaultRunner.runInVault0(helloWorldAsSnippet).get(60, TimeUnit.SECONDS);
+			assertThat(output.getStatusCode(), equalTo(-1));
 		} catch (VaultCompilerException vce) {
 			assertEquals(expectedCompilationIssue, vce.getCompilationMessage());
 		}

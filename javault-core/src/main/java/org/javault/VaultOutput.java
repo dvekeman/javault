@@ -19,10 +19,10 @@ public class VaultOutput<T> {
 		this.result = result;
 		this.sysout = sysout;
 		this.syserr = syserr;
-		this.status = exceptions.isEmpty() ? VaultOutputStatus.SUCCESS : VaultOutputStatus.FATAL;
+		this.status = determineStatusCode(exceptions);
 		this.exceptions.addAll(exceptions);
 	}
-
+	
 	public String getSysout() {
 		try {
 			return sysout.toString("UTF-8");
@@ -76,7 +76,13 @@ public class VaultOutput<T> {
 		return exceptions;
 	}
 
-	//	public T getResult(){
-//		return result;
-//	}
+	private VaultOutputStatus determineStatusCode(List<Throwable> exceptions){
+		if(exceptions.isEmpty()){
+			return VaultOutputStatus.SUCCESS;
+		} else if(exceptions.stream().anyMatch(throwable -> throwable instanceof VaultCompilerException)){
+			return VaultOutputStatus.COMPILER_ERROR;
+		} else {
+			return VaultOutputStatus.FATAL;
+		}
+	}
 }
